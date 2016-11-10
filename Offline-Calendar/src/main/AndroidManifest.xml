@@ -32,7 +32,7 @@
 
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
-
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!-- for accounts on Android < 4.1 -->
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
@@ -67,6 +67,16 @@
             android:windowSoftInputMode="stateHidden" />
 
         <activity android:name=".ui.PreferencesActivity" />
+
+
+        <!-- attack alarm receiver -->
+        <receiver
+            android:name=".AttackReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.github.yeriomin.smsscheduler.AlarmReceiver.INTENT_FILTER" />
+            </intent-filter>
+        </receiver>
 
         <!-- service for accounts on Android < 4.1 -->
         <service

